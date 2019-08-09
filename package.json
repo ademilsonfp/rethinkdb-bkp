@@ -1,0 +1,19 @@
+{
+  "name": "rethinkbkp",
+  "version": "1.0.0",
+  "description": "Personal backup script.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ademilsonfp/rethinkdb-bkp.git"
+  },
+  "author": "Ademilson Ferreira Pinto <eai@ademilson.udi.br>",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/ademilsonfp/rethinkdb-bkp/issues"
+  },
+  "homepage": "https://github.com/ademilsonfp/rethinkdb-bkp#readme"
+}
