@@ -1,5 +1,5 @@
 {
-  "name": "rethinkbkp",
+  "name": "rethinkdb-bkp",
   "version": "1.0.0",
   "description": "Personal backup script.",
   "main": "index.js",
@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/ademilsonfp/rethinkdb-bkp/issues"
   },
-  "homepage": "https://github.com/ademilsonfp/rethinkdb-bkp#readme"
+  "homepage": "https://github.com/ademilsonfp/rethinkdb-bkp#readme",
+  "dependencies": {
+    "archiver": "^3.1.1",
+    "inquirer": "^6.5.0",
+    "ora": "^3.4.0",
+    "rethinkdb": "^2.3.3"
+  }
 }
