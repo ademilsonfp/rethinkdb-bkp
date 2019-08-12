@@ -4,6 +4,7 @@ const r = require('rethinkdb');
 const inquirer = require('inquirer');
 const luxon = require('luxon');
 const cliProgress = require('cli-progress');
+const fs = require('fs');
 const archiver = require('archiver');
 
 async function main() {
@@ -16,7 +17,7 @@ async function main() {
     let timestamp = luxon.DateTime.local().toFormat('yyyyMMddHHmmss');
     let destPath = await chooseDest(`/tmp/db-${timestamp}Z.zip`);
 
-    // await dumpDocs(dbConn, dbTables, docsCount, destPath);
+    await dumpDocs(destPath, docsCount, dbConn, dbTables);
     await dbConn.close();
   } catch (error) {
     console.error(error);
@@ -50,7 +51,7 @@ async function chooseDbs(dbConn) {
       choices,
       name: 'dbNames',
       type: 'checkbox',
-      message: 'Select one or more databases'
+      message: 'Select one or more databases:'
     }));
   } catch (error) {
     if (feedback.isSpinning) {
@@ -112,14 +113,50 @@ async function chooseDest(defaul) {
   const { destPath } = await inquirer.prompt({
     default: defaul,
     name: 'destPath',
-    message: 'Select destination'
+    message: 'Select the destination file:'
   });
 
   return destPath;
 }
 
-async function dumpDocs(destPath, dbConn, dbTables, docsCount) {
+async function dumpDocs(destPath, docsCount, dbConn, dbTables) {
+  const progress = new cliProgress.SingleBar({},
+      cliProgress.Presets.shades_classic);
 
+  progress.start(docsCount, 0);
+
+  try {
+    let output = fs.createWriteStream(destPath);
+    let archive = archiver('zip', { zlib: { level: 9 } });
+
+    archive.pipe(output);
+
+    let tables, cursor, doc, buffer;
+
+    for (let dbName in dbTables) {
+      tables = dbTables[dbName];
+
+      for (let i = 0, name; i < tables.length; i++) {
+        name = tables[i];
+        cursor = await r.db(dbName).table(name).run(dbConn);
+
+        while (cursor.hasNext()) {
+          doc = await cursor.next();
+          buffer = Buffer.from(JSON.stringify(doc, null, 2));
+
+          archive.append(buffer, { name: `${dbName}/${name}/${doc.id}.json` });
+          progress.increment();
+        }
+      }
+    }
+
+    await archive.finalize();
+
+    progress.stop();
+  } catch (error) {
+    progress.stop();
+    throw error;
+  }
 }
 
 main();
