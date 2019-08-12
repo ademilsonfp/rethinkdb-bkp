@@ -131,7 +131,7 @@ async function dumpDocs(destPath, docsCount, dbConn, dbTables) {
 
     archive.pipe(output);
 
-    let tables, cursor, buffer;
+    let tables, cursor, doc, buffer;
 
     for (let dbName in dbTables) {
       tables = dbTables[dbName];
@@ -140,17 +140,20 @@ async function dumpDocs(destPath, docsCount, dbConn, dbTables) {
         name = tables[i];
         cursor = await r.db(dbName).table(name).run(dbConn);
 
-        cursor.each(function(doc) {
-          buffer = Buffer.from(JSON.stringify(doc, null, 2));
+        try {
+          while (doc = await cursor.next()) {
+            buffer = Buffer.from(JSON.stringify(doc, null, 2));
 
-          archive.append(buffer, { name: `${dbName}/${name}/${doc.id}.json` });
-          progress.increment();
-        });
+            archive.append(buffer, { name: `${dbName}/${name}/${doc.id}.json` });
+            progress.increment();
+          }
+        } finally {
+          await cursor.close();
+        }
       }
     }
 
     await archive.finalize();
-
     progress.stop();
   } catch (error) {
     progress.stop();
