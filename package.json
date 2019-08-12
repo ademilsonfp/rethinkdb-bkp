@@ -18,7 +18,9 @@
   "homepage": "https://github.com/ademilsonfp/rethinkdb-bkp#readme",
   "dependencies": {
     "archiver": "^3.1.1",
+    "cli-progress": "^3.0.0",
     "inquirer": "^6.5.0",
+    "luxon": "^1.17.2",
     "ora": "^3.4.0",
     "rethinkdb": "^2.3.3"
   }
